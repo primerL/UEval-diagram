@@ -38,20 +38,28 @@
                             
                             // 查找类似 (L_{\text{stage1}}=...) 的模式
                             const text = element.innerHTML;
-                            const latexPattern = /\(([A-Za-z_][A-Za-z0-9_]*\s*[=<>≤≥]\s*[^)]+)\)/g;
+                            let newText = text;
                             
-                            let newText = text.replace(latexPattern, (match, formula) => {
-                                // 检查是否包含LaTeX命令
-                                if (formula.includes('\\') || formula.includes('{') || formula.includes('}')) {
-                                    return `(${formula})`;
-                                }
-                                return match;
+                            // 1. 处理括号中的LaTeX公式，如 (L_{\text{stage1}}=...)
+                            const latexPattern = /\(([^)]*\\[a-zA-Z]+[^)]*)\)/g;
+                            newText = newText.replace(latexPattern, (match, formula) => {
+                                console.log('检测到括号LaTeX公式:', match);
+                                return `$${formula}$`;
                             });
                             
-                            // 查找更复杂的LaTeX模式
-                            const complexPattern = /\(([^)]*\\[a-zA-Z]+[^)]*)\)/g;
-                            newText = newText.replace(complexPattern, (match, formula) => {
-                                return `(${formula})`;
+                            // 2. 处理独立的LaTeX命令，如 \text{...}
+                            const commandPattern = /(?!\$[^$]*)\\([a-zA-Z]+)\{([^}]+)\}(?![^$]*\$)/g;
+                            newText = newText.replace(commandPattern, (match) => {
+                                console.log('检测到LaTeX命令:', match);
+                                return `$${match}$`;
+                            });
+                            
+                            // 3. 处理下标上标表达式，如 L_{\text{stage1}}
+                            const subscriptPattern = /(?!\$[^$]*)([A-Za-z_][A-Za-z0-9_]*_[^{][^$]*)/g;
+                            newText = newText.replace(subscriptPattern, (match) => {
+                                if (match.includes('$') || match.length < 3) return match;
+                                console.log('检测到下标表达式:', match);
+                                return `$${match}$`;
                             });
                             
                             if (newText !== text) {
