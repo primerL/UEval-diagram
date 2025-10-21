@@ -6,78 +6,6 @@
     <title>Diagram Review System</title>
     <!-- 添加marked.js库用于Markdown渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <!-- 添加MathJax库用于LaTeX公式渲染 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true,
-                processEnvironments: true,
-                // 添加自定义的公式识别规则
-                macros: {},
-                // 启用更宽松的公式识别
-                tags: 'ams'
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-                // 启用更宽松的公式检测
-                ignoreHtmlClass: 'tex2jax_ignore',
-                processHtmlClass: 'tex2jax_process'
-            },
-            // 添加预处理函数来自动检测LaTeX公式
-            startup: {
-                ready: function () {
-                    MathJax.startup.defaultReady();
-                    // 自定义函数来检测和包装LaTeX公式
-                    window.detectAndWrapLatex = function() {
-                        const elements = document.querySelectorAll('.markdown-content, .reference-text, .model-text');
-                        elements.forEach(element => {
-                            if (element.dataset.processed) return; // 避免重复处理
-                            element.dataset.processed = 'true';
-                            
-                            // 查找类似 (L_{\text{stage1}}=...) 的模式
-                            const text = element.innerHTML;
-                            let newText = text;
-                            
-                            // 1. 处理括号中的LaTeX公式，如 (L_{\text{stage1}}=...)
-                            const latexPattern = /\(([^)]*\\[a-zA-Z]+[^)]*)\)/g;
-                            newText = newText.replace(latexPattern, (match, formula) => {
-                                console.log('检测到括号LaTeX公式:', match);
-                                return `$${formula}$`;
-                            });
-                            
-                            // 2. 处理独立的LaTeX命令，如 \text{...}
-                            const commandPattern = /(?!\$[^$]*)\\([a-zA-Z]+)\{([^}]+)\}(?![^$]*\$)/g;
-                            newText = newText.replace(commandPattern, (match) => {
-                                console.log('检测到LaTeX命令:', match);
-                                return `$${match}$`;
-                            });
-                            
-                            // 3. 处理下标上标表达式，如 L_{\text{stage1}}
-                            const subscriptPattern = /(?!\$[^$]*)([A-Za-z_][A-Za-z0-9_]*_[^{][^$]*)/g;
-                            newText = newText.replace(subscriptPattern, (match) => {
-                                if (match.includes('$') || match.length < 3) return match;
-                                console.log('检测到下标表达式:', match);
-                                return `$${match}$`;
-                            });
-                            
-                            if (newText !== text) {
-                                element.innerHTML = newText;
-                            }
-                        });
-                        
-                        // 重新渲染MathJax
-                        if (window.MathJax && window.MathJax.typesetPromise) {
-                            window.MathJax.typesetPromise();
-                        }
-                    };
-                }
-            }
-        };
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -730,26 +658,6 @@
             margin: 2em 0;
         }
 
-        /* MathJax 公式样式 */
-        .MathJax {
-            font-size: 1.1em !important;
-        }
-
-        .MathJax_Display {
-            margin: 1em 0 !important;
-            text-align: center !important;
-        }
-
-        .MathJax_SVG {
-            display: inline-block !important;
-            vertical-align: middle !important;
-        }
-
-        /* 确保公式在深色背景下也能正确显示 */
-        .markdown-content .MathJax {
-            color: #2c3e50 !important;
-        }
-
 
         @media (max-width: 768px) {
             .container {
@@ -873,17 +781,7 @@
             renderMarkdown(text) {
                 if (!text) return '';
                 try {
-                    const html = marked.parse(text);
-                    // 延迟触发MathJax渲染，确保DOM已更新
-                    setTimeout(() => {
-                        if (window.detectAndWrapLatex) {
-                            window.detectAndWrapLatex();
-                        }
-                        if (window.MathJax) {
-                            window.MathJax.typesetPromise();
-                        }
-                    }, 100);
-                    return html;
+                    return marked.parse(text);
                 } catch (error) {
                     console.error('Markdown渲染错误:', error);
                     return text; // 如果渲染失败，返回原始文本
@@ -975,16 +873,6 @@
                 }
 
                 container.innerHTML = this.filteredData.map(item => this.createItemCard(item)).join('');
-                
-                // 渲染完成后触发MathJax重新渲染公式
-                setTimeout(() => {
-                    if (window.detectAndWrapLatex) {
-                        window.detectAndWrapLatex();
-                    }
-                    if (window.MathJax) {
-                        window.MathJax.typesetPromise();
-                    }
-                }, 200);
             }
 
             createItemCard(item) {
