@@ -328,7 +328,7 @@
       }
     ],
     "GPT_image": "GPT-thinking/diagram/2.png",
-    "GPT_text": "CIFD overview. A frozen teacher backbone produces intermediate embeddings from the input image. A trainable Rate-Distortion Module (RDM)—encoder → noise-injection channel → decoder—takes these embeddings, passes them through a bottleneck, and reconstructs them. Training minimizes the total loss L_{\text{total}}=L_{\text{MSE}}+L_{\text{rate}}, where L_{\text{MSE}} measures the mean-squared error between teacher and reconstructed embeddings, and L_{\text{rate}} penalizes information flow through the bottleneck; gradients update only the RDM.",
+    "GPT_text": "CIFD overview. A frozen teacher backbone produces intermediate embeddings from the input image. A trainable Rate-Distortion Module (RDM)—encoder → noise-injection channel → decoder—takes these embeddings, passes them through a bottleneck, and reconstructs them. Training minimizes the total loss L_{\\text{total}}=L_{\\text{MSE}}+L_{\\text{rate}}, where L_{\\text{MSE}} measures the mean-squared error between teacher and reconstructed embeddings, and L_{\\text{rate}} penalizes information flow through the bottleneck; gradients update only the RDM.",
     "GPT_text_result": [
       {
         "criterion": "The answer's caption or diagram description must state that the Rate-Distortion Module (RDM) is trained to reconstruct or mimic the embeddings from a pretrained teacher model.",
